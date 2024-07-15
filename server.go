@@ -295,9 +295,10 @@ func (m *HabanalabsDevicePlugin) cleanup() error {
 
 func (m *HabanalabsDevicePlugin) healthcheck() {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	healthyDevices := make(chan *pluginapi.Device)
+	unhealthyDevices := make(map[string]*pluginapi.Device)
 	xids := make(chan *pluginapi.Device)
-	go watchXIDs(ctx, m.devs, xids)
+	go watchXIDs(ctx, m.devs, xids, healthyDevices, unhealthyDevices)
 
 	for {
 		select {
