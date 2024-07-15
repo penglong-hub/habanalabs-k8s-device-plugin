@@ -40,7 +40,7 @@ ENV GOPATH /opt/habanalabs/go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 WORKDIR /opt/habanalabs/go/src/habanalabs-device-plugin
-
+ENV GOPROXY https://goproxy.cn,direct
 COPY . .
 RUN go mod tidy
 
