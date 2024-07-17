@@ -139,9 +139,14 @@ func watchXIDs(ctx context.Context, devs []*pluginapi.Device, xids chan<- *plugi
 		case <-healthCheckInterval.C:
 			e, err := hlml.WaitForEvent(eventSet, 1000)
 			if err != nil {
-				hlml.DeleteEventSet(eventSet)
-				eventSet := hlml.NewEventSet()
-				defer hlml.DeleteEventSet(eventSet)
+				for id, d := range unhealthyDevices {
+					err := hlml.RegisterEventForDevice(eventSet, hlml.HlmlCriticalError, id)
+					if err == nil {
+						slog.Info("Device has recovered and is now healthy", "device_id", id)
+						healthyDevices <- d
+						delete(unhealthyDevices, id)
+					}
+				}
 				for _, d := range devs {
 					err := hlml.RegisterEventForDevice(eventSet, hlml.HlmlCriticalError, d.ID)
 					if err != nil {
